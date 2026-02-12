@@ -84,6 +84,17 @@ struct Object
 	
 };
 
+struct Billboard
+{
+	vf3d scale{ 1, 1, 1 }, rotation, translation;
+	int num_x = 0, num_y = 0;
+	int num_ttl = 0;
+
+	float anim_timer = 0;
+	int anim = 0;
+	sg_view tex{ SG_INVALID_ID };
+};
+
 struct
 {
 	vf3d pos{ 0,2,2 };
@@ -126,7 +137,13 @@ struct Demo : SokolEngine {
 	Object* held_obj = nullptr;
 	vf3d grab_ctr, grab_norm;
 
-	
+	struct
+	{
+		sg_pipeline pip{};
+
+		sg_buffer vbuf{};
+	}billboard_render;
+
 	std::vector<Light> lights;
 	Light* mainlight;
 
@@ -309,6 +326,7 @@ struct Demo : SokolEngine {
 		pip_desc.layout.attrs[ATTR_texview_v_pos].format = SG_VERTEXFORMAT_FLOAT2;
 		pip_desc.layout.attrs[ATTR_texview_v_uv].format = SG_VERTEXFORMAT_FLOAT2;
 		pip_desc.shader = sg_make_shader(texview_shader_desc(sg_query_backend()));
+		pip_desc.index_type = SG_INDEXTYPE_UINT32;
 		pip_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLE_STRIP;
 
 		//with alpha blending
@@ -370,6 +388,29 @@ struct Demo : SokolEngine {
 		
 		default_pip=sg_make_pipeline(pipeline_desc);
 	}
+
+	void setupbillboardpipeline()
+	{
+		sg_pipeline_desc pip_desc{};
+		pip_desc.layout.attrs[ATTR_billboard_i_pos].format = SG_VERTEXFORMAT_FLOAT3;
+		pip_desc.layout.attrs[ATTR_billboard_i_norm].format = SG_VERTEXFORMAT_FLOAT3;
+		pip_desc.layout.attrs[ATTR_billboard_i_uv].format = SG_VERTEXFORMAT_FLOAT2;
+		pip_desc.shader = sg_make_shader(billboard_shader_desc(sg_query_backend()));
+		pip_desc.index_type = SG_INDEXTYPE_UINT32;
+		//pip_desc.cull_mode = SG_CULLMODE_FRONT;
+		//pip_desc.depth.write_enabled = true;
+		//pip_desc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
+		//pip_desc.depth.pixel_format = SG_PIXELFORMAT_DEPTH;
+	
+
+		//with alpha blending
+		pip_desc.colors[0].blend.enabled = true;
+		pip_desc.colors[0].blend.src_factor_rgb = SG_BLENDFACTOR_SRC_ALPHA;
+		pip_desc.colors[0].blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+		pip_desc.colors[0].blend.src_factor_alpha = SG_BLENDFACTOR_ONE;
+		pip_desc.colors[0].blend.dst_factor_alpha = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+		billboard_render.pip = sg_make_pipeline(pip_desc);
+	}
 #pragma endregion
 
 	void userCreate() override {
@@ -385,7 +426,7 @@ struct Demo : SokolEngine {
 		setupWeapons();
 
 		setupBillboard();
-
+		setupbillboardpipeline();
 		
 
 		setup_Quad();
@@ -789,39 +830,48 @@ struct Demo : SokolEngine {
 
 	void renderWeapons(Object& obj, mat4& view_proj)
 	{
-		sg_apply_pipeline(default_pip);
+		sg_apply_pipeline(billboard_render.pip);
 		sg_bindings bind{};
 		bind.vertex_buffers[0] = obj.mesh.vbuf;
 		bind.index_buffer = obj.mesh.ibuf;
-		bind.samplers[SMP_default_smp] = sampler;
-		bind.views[VIEW_default_tex] = obj.tex;
+		bind.samplers[SMP_u_billboard_smp] = sampler;
+		bind.views[VIEW_u_billboard_tex] = obj.tex;
 		sg_apply_bindings(bind);
 
 		//pass transformation matrix
 		mat4 mvp = mat4::mul(view_proj, obj.model);
-		vs_params_t vs_params{};
-		std::memcpy(vs_params.u_mvp, mvp.m, sizeof(mvp.m));
-		sg_apply_uniforms(UB_vs_params, SG_RANGE(vs_params));
+		vs_billboard_params_t vs_billboad_params{};
 
-		//which region of texture to sample?
-
-		fs_params_t fs_params{};
 		int row = obj.anim / obj.num_x;
 		int col = obj.anim % obj.num_x;
 		float u_left = col / float(obj.num_x);
 		float u_right = (1 + col) / float(obj.num_x);
 		float v_top = row / float(obj.num_y);
 		float v_btm = (1 + row) / float(obj.num_y);
-		fs_params.u_tl[0] = u_left;
-		fs_params.u_tl[1] = v_top;
-		fs_params.u_br[0] = u_right;
-		fs_params.u_br[1] = v_btm;
-		fs_params.u_tint[0] = 1.0f;
-		fs_params.u_tint[1] = 1.0f;
-		fs_params.u_tint[2] = 1.0f;
-		fs_params.u_tint[3] = 1.0f;
+		vs_billboad_params.u_tl[0] = u_left;
+		vs_billboad_params.u_tl[1] = v_top;
+		vs_billboad_params.u_br[0] = u_right;
+		vs_billboad_params.u_br[1] = v_btm;
 
-		sg_apply_uniforms(UB_fs_params, SG_RANGE(fs_params));
+		std::memcpy(vs_billboad_params.u_mvp, mvp.m, sizeof(mvp.m));
+		std::memcpy(vs_billboad_params.u_model, obj.model.m, sizeof(obj.model.m));
+		sg_apply_uniforms(UB_vs_billboard_params, SG_RANGE(vs_billboad_params));
+
+		//which region of texture to sample?
+
+		fs_billboard_params_t fs_billboard_params{};
+		
+		fs_billboard_params.u_tint[0] = 1.0f;
+		fs_billboard_params.u_tint[1] = 1.0f;
+		fs_billboard_params.u_tint[2] = 1.0f;
+		fs_billboard_params.u_eye_pos[0] = cam.pos.x;
+		fs_billboard_params.u_eye_pos[1] = cam.pos.y;
+		fs_billboard_params.u_eye_pos[2] = cam.pos.z;
+		fs_billboard_params.u_light_pos[0] = cam.pos.x;
+		fs_billboard_params.u_light_pos[1] = cam.pos.y + 2;
+		fs_billboard_params.u_light_pos[2] = cam.pos.z - 2;
+
+		sg_apply_uniforms(UB_fs_billboard_params, SG_RANGE(fs_billboard_params));
 
 
 		sg_draw(0, 3 * obj.mesh.tris.size(), 1);
@@ -841,6 +891,7 @@ struct Demo : SokolEngine {
 
 		sg_apply_pipeline(gGui.pip);
 
+		
 		gGui.bind.views[VIEW_texview_tex] = gGui.gui_image;
 		sg_apply_bindings(gGui.bind);
 
