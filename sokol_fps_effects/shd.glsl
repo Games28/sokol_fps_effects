@@ -28,6 +28,7 @@ layout(binding=0) uniform texture2D default_tex;
 layout(binding=0) uniform sampler default_smp;
 
 layout(binding=1) uniform fs_params {
+	vec4 u_tint;
 	vec2 u_tl;
 	vec2 u_br;
 	vec3 u_view_pos;
@@ -91,8 +92,8 @@ void main() {
 	
 	//linear->srgb
 	vec3 col_srgb=pow(col, vec3(1/2.2));
-	frag_color=vec4(col_srgb, 1);
-
+	vec4 color= vec4(col_srgb, 1);
+	frag_color = u_tint * color;
 }
 
 @end

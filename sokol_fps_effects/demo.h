@@ -346,12 +346,10 @@ struct Demo : SokolEngine {
 		pipeline_desc.layout.attrs[ATTR_default_v_norm].format=SG_VERTEXFORMAT_FLOAT3;
 		pipeline_desc.layout.attrs[ATTR_default_v_uv].format=SG_VERTEXFORMAT_FLOAT2;
 		pipeline_desc.shader=sg_make_shader(default_shader_desc(sg_query_backend()));
-		pipeline_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLE_STRIP;
+
 		pipeline_desc.index_type=SG_INDEXTYPE_UINT32;
 		//pipeline_desc.cull_mode=SG_CULLMODE_FRONT;
-		pipeline_desc.depth.write_enabled=true;
-		pipeline_desc.depth.compare=SG_COMPAREFUNC_LESS_EQUAL;
-		pipeline_desc.depth.pixel_format = SG_PIXELFORMAT_DEPTH;
+	
 
 		//with alpha blending
 		pipeline_desc.colors[0].blend.enabled = true;
@@ -359,8 +357,7 @@ struct Demo : SokolEngine {
 		pipeline_desc.colors[0].blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
 		pipeline_desc.colors[0].blend.src_factor_alpha = SG_BLENDFACTOR_ONE;
 		pipeline_desc.colors[0].blend.dst_factor_alpha = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
-		pipeline_desc.depth.pixel_format = SG_PIXELFORMAT_DEPTH;
-
+		
 		default_pip=sg_make_pipeline(pipeline_desc);
 	}
 #pragma endregion
@@ -691,6 +688,7 @@ struct Demo : SokolEngine {
 
 #pragma region RENDER HELPERS
 	void renderPlatform(Object& obj,const mat4& view_proj) {
+		sg_apply_pipeline(default_pip);
 		sg_bindings bind{};
 		bind.vertex_buffers[0]=obj.mesh.vbuf;
 		bind.index_buffer= obj.mesh.ibuf;
@@ -729,7 +727,10 @@ struct Demo : SokolEngine {
 		fs_params.u_view_pos[1] = cam.pos.y;
 		fs_params.u_view_pos[2] = cam.pos.z;
 		//sg_apply_uniforms(UB_fs_params, SG_RANGE(fs_params));
-
+		fs_params.u_tint[0] = 1.0f;
+		fs_params.u_tint[1] = 1.0f;
+		fs_params.u_tint[2] = 1.0f;
+		fs_params.u_tint[3] = 1.0f;
 
 		fs_params.u_tl[0]=0, fs_params.u_tl[1]=0;
 		fs_params.u_br[0]=1, fs_params.u_br[1]=1;
@@ -739,6 +740,7 @@ struct Demo : SokolEngine {
 	}
 	
 	void renderBillboard(Object& obj,const mat4& view_proj) {
+		sg_apply_pipeline(default_pip);
 		sg_bindings bind{};
 		bind.vertex_buffers[0]= obj.mesh.vbuf;
 		bind.index_buffer= obj.mesh.ibuf;
@@ -765,6 +767,10 @@ struct Demo : SokolEngine {
 		fs_params.u_tl[1]=v_top;
 		fs_params.u_br[0]=u_right;
 		fs_params.u_br[1]=v_btm;
+		fs_params.u_tint[0] = 1.0f;
+		fs_params.u_tint[1] = 1.0f;
+		fs_params.u_tint[2] = 1.0f;
+		fs_params.u_tint[3] = 1.0f;
 		sg_apply_uniforms(UB_fs_params, SG_RANGE(fs_params));
 		
 
@@ -773,7 +779,7 @@ struct Demo : SokolEngine {
 
 	void renderWeapons(Object& obj, mat4& view_proj)
 	{
-		//sg_apply_pipeline(default_pip);
+		sg_apply_pipeline(default_pip);
 		sg_bindings bind{};
 		bind.vertex_buffers[0] = obj.mesh.vbuf;
 		bind.index_buffer = obj.mesh.ibuf;
@@ -800,6 +806,11 @@ struct Demo : SokolEngine {
 		fs_params.u_tl[1] = v_top;
 		fs_params.u_br[0] = u_right;
 		fs_params.u_br[1] = v_btm;
+		fs_params.u_tint[0] = 1.0f;
+		fs_params.u_tint[1] = 1.0f;
+		fs_params.u_tint[2] = 1.0f;
+		fs_params.u_tint[3] = 1.0f;
+
 		sg_apply_uniforms(UB_fs_params, SG_RANGE(fs_params));
 
 
@@ -849,8 +860,6 @@ struct Demo : SokolEngine {
 		sg_begin_pass(pass);
 
 		
-
-		sg_apply_pipeline(default_pip);
 
 		
 		

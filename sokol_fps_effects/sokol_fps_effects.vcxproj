@@ -18,6 +18,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="demo.h" />
+    <ClInclude Include="mesh.h" />
+    <ClInclude Include="return_code.h" />
+    <ClInclude Include="shd.glsl.h" />
+    <ClInclude Include="sokol_engine.h" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="texture_utils.h" />
+    <ClInclude Include="utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shd.glsl" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -122,22 +138,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="demo.h" />
-    <ClInclude Include="mesh.h" />
-    <ClInclude Include="return_code.h" />
-    <ClInclude Include="shd.glsl.h" />
-    <ClInclude Include="sokol_engine.h" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="texture_utils.h" />
-    <ClInclude Include="utils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shd.glsl" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
