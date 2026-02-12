@@ -310,6 +310,16 @@ struct Demo : SokolEngine {
 		pip_desc.layout.attrs[ATTR_texview_v_uv].format = SG_VERTEXFORMAT_FLOAT2;
 		pip_desc.shader = sg_make_shader(texview_shader_desc(sg_query_backend()));
 		pip_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLE_STRIP;
+
+		//with alpha blending
+		pip_desc.colors[0].blend.enabled = true;
+		pip_desc.colors[0].blend.src_factor_rgb = SG_BLENDFACTOR_SRC_ALPHA;
+		pip_desc.colors[0].blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+		pip_desc.colors[0].blend.src_factor_alpha = SG_BLENDFACTOR_ONE;
+		pip_desc.colors[0].blend.dst_factor_alpha = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+
+
+
 		gGui.pip = sg_make_pipeline(pip_desc);
 
 		//quad vertex buffer: xyuv
@@ -326,10 +336,10 @@ struct Demo : SokolEngine {
 		gGui.bind.vertex_buffers[0] = sg_make_buffer(vbuf_desc);
 		gGui.bind.samplers[SMP_texview_smp] = sampler;
 
-		gGui.gui_image = getTexture("assets/animation_test.png");
+		gGui.gui_image = getTexture("assets/hands.png");
 
 		//setup texture animatons
-		gGui.num_x = 5; gGui.num_y = 2;
+		gGui.num_x = 3; gGui.num_y = 1;
 		gGui.num_ttl = gGui.num_x * gGui.num_y;
 	
 	}
@@ -839,6 +849,11 @@ struct Demo : SokolEngine {
 		fs_tex_params.u_tl[1] = v_top;
 		fs_tex_params.u_br[0] = u_right;
 		fs_tex_params.u_br[1] = v_btm;
+
+		fs_tex_params.u_tint[0] = 1.0f;
+		fs_tex_params.u_tint[1] = 1.0f;
+		fs_tex_params.u_tint[2] = 1.0f;
+		fs_tex_params.u_tint[3] = 1.0f;
 
 		sg_apply_uniforms(UB_fs_texview_params, SG_RANGE(fs_tex_params));
 		sg_apply_viewport(2, 2, 100, 100, true);

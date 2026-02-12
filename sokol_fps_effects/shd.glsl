@@ -58,7 +58,6 @@ void main() {
 
 	//srgb->linear
 	vec3 base_col_srgb=texture(sampler2D(default_tex, default_smp),u_tl + uv * (u_br - u_tl)).rgb;
-	//vec3 base_col_srgb=texture(sampler2D(default_tex, default_smp), uv).rgb;
 	vec3 base_col=pow(base_col_srgb, vec3(2.2));
 
 	vec3 n=normalize(norm);
@@ -92,8 +91,7 @@ void main() {
 	
 	//linear->srgb
 	vec3 col_srgb=pow(col, vec3(1/2.2));
-	vec4 color= vec4(col_srgb, 1);
-	frag_color = u_tint * color;
+	frag_color = vec4(col_srgb, 1) * u_tint;
 }
 
 @end
@@ -125,6 +123,7 @@ layout(binding = 0) uniform sampler texview_smp;
 
 layout(binding = 0) uniform fs_texview_params
 {
+	vec4 u_tint;
 	vec2 u_tl;
 	vec2 u_br;
 };
@@ -135,58 +134,11 @@ out vec4 frag_color;
 
 void main()
 {
-	vec4 col = texture(sampler2D(texview_tex, texview_smp), u_tl + uv * (u_br - u_tl));
-	frag_color = vec4(col.rgb, 1);
+	vec4 col =  texture(sampler2D(texview_tex, texview_smp), u_tl + uv * (u_br - u_tl));
+	frag_color = u_tint * col;
 }
 
 @end
 
 @program texview vs_texview fs_texview
-
-///////////////// 3d objects ///////////////////////////////////
-//@vs vs_objview
-//
-//layout(binding = 0) uniform vs_objview_params
-//{
-//	mat4 u_model;
-//	mat4 u_proj_view;
-//};
-//
-//in vec3 pos;
-//in vec3 norm;
-//in vec2 uv;
-//
-//out vec3 v_pos;
-//out vec3 v_norm;
-//out vec2 v_uv;
-//
-//void main()
-//{
-//	vec4 world_pos = u_model * vec4(pos, 1);
-//	v_pos = world_pos.xyz;
-//	v_norm = mat3(u_model)*norm;
-//	gl_Position = u_proj_view * world_pos;
-//	v_uv = uv;
-//
-//}
-//
-//@end
-//
-//@fs fs_objview
-//
-//layout(binding = 1) uniform fs_objview_params
-//{
-//	vec3 u_light_pos;
-//	vec3 u_cam_pos;
-//};
-//
-//in vec3 v_pos;
-//in vec3 v_norm;
-//in vec2 v_nv;
-//
-//layout(binding = 0) uniform texture2D u_tex;
-//layout(binding = 0) uniform sampler u_smp;
-//
-//out vec4 frag_col
-
 
