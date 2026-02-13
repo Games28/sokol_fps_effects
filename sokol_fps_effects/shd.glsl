@@ -174,7 +174,7 @@ void main() {
 layout(binding=1) uniform fs_billboard_params {
 	vec3 u_eye_pos;
 	vec3 u_light_pos;
-	vec3 u_tint;
+	vec4 u_tint;
 };
 
 layout(binding=0) uniform texture2D u_billboard_tex;
@@ -195,13 +195,14 @@ void main() {
 	float amb_mag=.2;
 	float diff_mag=.7*max(dot(N, L), 0);
 	vec4 tex_col=texture(sampler2D(u_billboard_tex, u_billboard_smp), uv);
-	vec3 base_col=u_tint*tex_col.rgb;
+	vec3 base_col= tex_col.rgb;
 
 	//white specular
 	float spec_mag=.3*pow(max(dot(R, V), 0), 32);
 	vec3 spec=spec_mag*vec3(1, 1, 1);
 
-	o_frag_col=vec4(base_col*(amb_mag+diff_mag)+spec, 1);
+	vec4 col = vec4(base_col*(amb_mag+diff_mag)+spec, 1);
+	o_frag_col = u_tint * col;
 }
 
 @end

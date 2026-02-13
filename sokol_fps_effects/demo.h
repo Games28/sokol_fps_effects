@@ -326,7 +326,7 @@ struct Demo : SokolEngine {
 		pip_desc.layout.attrs[ATTR_texview_v_pos].format = SG_VERTEXFORMAT_FLOAT2;
 		pip_desc.layout.attrs[ATTR_texview_v_uv].format = SG_VERTEXFORMAT_FLOAT2;
 		pip_desc.shader = sg_make_shader(texview_shader_desc(sg_query_backend()));
-		pip_desc.index_type = SG_INDEXTYPE_UINT32;
+		//pip_desc.index_type = SG_INDEXTYPE_UINT32;
 		pip_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLE_STRIP;
 
 		//with alpha blending
@@ -376,7 +376,7 @@ struct Demo : SokolEngine {
 		pipeline_desc.shader=sg_make_shader(default_shader_desc(sg_query_backend()));
 
 		pipeline_desc.index_type=SG_INDEXTYPE_UINT32;
-		//pipeline_desc.cull_mode=SG_CULLMODE_FRONT;
+		pipeline_desc.cull_mode=SG_CULLMODE_FRONT;
 	
 
 		//with alpha blending
@@ -397,9 +397,9 @@ struct Demo : SokolEngine {
 		pip_desc.layout.attrs[ATTR_billboard_i_uv].format = SG_VERTEXFORMAT_FLOAT2;
 		pip_desc.shader = sg_make_shader(billboard_shader_desc(sg_query_backend()));
 		pip_desc.index_type = SG_INDEXTYPE_UINT32;
-		//pip_desc.cull_mode = SG_CULLMODE_FRONT;
-		//pip_desc.depth.write_enabled = true;
-		//pip_desc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
+		pip_desc.cull_mode = SG_CULLMODE_FRONT;
+		pip_desc.depth.write_enabled = true;
+		pip_desc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
 		//pip_desc.depth.pixel_format = SG_PIXELFORMAT_DEPTH;
 	
 
@@ -864,6 +864,7 @@ struct Demo : SokolEngine {
 		fs_billboard_params.u_tint[0] = 1.0f;
 		fs_billboard_params.u_tint[1] = 1.0f;
 		fs_billboard_params.u_tint[2] = 1.0f;
+		fs_billboard_params.u_tint[3] = 1.0f;
 		fs_billboard_params.u_eye_pos[0] = cam.pos.x;
 		fs_billboard_params.u_eye_pos[1] = cam.pos.y;
 		fs_billboard_params.u_eye_pos[2] = cam.pos.z;
